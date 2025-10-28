@@ -1,0 +1,786 @@
+openapi: 3.0.3
+info:
+  title: School Equipment Loan Management API
+  description: REST API for managing school equipment loans with role-based access control
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@schoolequipment.com
+
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Local development server
+  - url: https://api.schoolequipment.com/v1
+    description: Production server
+
+tags:
+  - name: Authentication
+    description: User authentication and authorization
+  - name: Equipment
+    description: Equipment management operations
+  - name: Borrow Requests
+    description: Borrow request lifecycle management
+  - name: Users
+    description: User management (Admin only)
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "1"
+        email:
+          type: string
+          format: email
+          example: "student@school.com"
+        name:
+          type: string
+          example: "John Doe"
+        role:
+          type: string
+          enum: [student, staff, admin]
+          example: "student"
+      required:
+        - id
+        - email
+        - name
+        - role
+
+    Equipment:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "eq1"
+        name:
+          type: string
+          example: "MacBook Pro 16"
+        category:
+          type: string
+          example: "Laptops"
+        condition:
+          type: string
+          enum: [excellent, good, fair]
+          example: "excellent"
+        quantity:
+          type: integer
+          minimum: 0
+          example: 10
+        available:
+          type: integer
+          minimum: 0
+          example: 7
+        description:
+          type: string
+          example: "High-performance laptop for development"
+        imageUrl:
+          type: string
+          format: uri
+          example: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8"
+      required:
+        - id
+        - name
+        - category
+        - condition
+        - quantity
+        - available
+
+    BorrowRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "req1"
+        equipmentId:
+          type: string
+          example: "eq1"
+        userId:
+          type: string
+          example: "1"
+        userName:
+          type: string
+          example: "John Doe"
+        status:
+          type: string
+          enum: [pending, approved, rejected, returned]
+          example: "pending"
+        requestDate:
+          type: string
+          format: date-time
+          example: "2025-01-15T10:30:00Z"
+        approvedDate:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2025-01-15T14:20:00Z"
+        returnDate:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2025-01-20T09:15:00Z"
+        approvedBy:
+          type: string
+          nullable: true
+          example: "Jane Smith"
+        quantity:
+          type: integer
+          minimum: 1
+          example: 1
+        notes:
+          type: string
+          nullable: true
+          example: "Needed for project work"
+      required:
+        - id
+        - equipmentId
+        - userId
+        - userName
+        - status
+        - requestDate
+        - quantity
+
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: "student@school.com"
+        password:
+          type: string
+          format: password
+          example: "password123"
+      required:
+        - email
+        - password
+
+    SignupRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: "newstudent@school.com"
+        password:
+          type: string
+          format: password
+          minLength: 6
+          example: "password123"
+        name:
+          type: string
+          example: "Alice Johnson"
+        role:
+          type: string
+          enum: [student, staff, admin]
+          example: "student"
+      required:
+        - email
+        - password
+        - name
+        - role
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        user:
+          $ref: '#/components/schemas/User'
+      required:
+        - token
+        - user
+
+    CreateEquipmentRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "iPad Pro"
+        category:
+          type: string
+          example: "Tablets"
+        condition:
+          type: string
+          enum: [excellent, good, fair]
+          example: "excellent"
+        quantity:
+          type: integer
+          minimum: 1
+          example: 5
+        description:
+          type: string
+          example: "Latest model with Apple Pencil"
+        imageUrl:
+          type: string
+          format: uri
+          example: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0"
+      required:
+        - name
+        - category
+        - condition
+        - quantity
+
+    CreateBorrowRequest:
+      type: object
+      properties:
+        equipmentId:
+          type: string
+          example: "eq1"
+        quantity:
+          type: integer
+          minimum: 1
+          example: 1
+        notes:
+          type: string
+          nullable: true
+          example: "Need for upcoming presentation"
+      required:
+        - equipmentId
+        - quantity
+
+    UpdateRequestStatusRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [approved, rejected, returned]
+          example: "approved"
+      required:
+        - status
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Invalid credentials"
+        message:
+          type: string
+          example: "The email or password provided is incorrect"
+        statusCode:
+          type: integer
+          example: 401
+
+paths:
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: User login
+      description: Authenticate user and return JWT token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/signup:
+    post:
+      tags:
+        - Authentication
+      summary: User registration
+      description: Register a new user account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
+      responses:
+        '201':
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Invalid input or email already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/me:
+    get:
+      tags:
+        - Authentication
+      summary: Get current user
+      description: Retrieve authenticated user information
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User information retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized - invalid or missing token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /equipment:
+    get:
+      tags:
+        - Equipment
+      summary: List all equipment
+      description: Retrieve paginated list of equipment with optional filters
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+          description: Filter by category
+          example: "Laptops"
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Search in equipment name and description
+          example: "MacBook"
+        - name: available
+          in: query
+          schema:
+            type: boolean
+          description: Filter only available equipment
+          example: true
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: Page number
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: Items per page
+      responses:
+        '200':
+          description: Equipment list retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Equipment'
+                  pagination:
+                    type: object
+                    properties:
+                      page:
+                        type: integer
+                        example: 1
+                      limit:
+                        type: integer
+                        example: 20
+                      total:
+                        type: integer
+                        example: 45
+                      totalPages:
+                        type: integer
+                        example: 3
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      tags:
+        - Equipment
+      summary: Create new equipment
+      description: Add new equipment to inventory (Admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEquipmentRequest'
+      responses:
+        '201':
+          description: Equipment created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Equipment'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - Admin access required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /equipment/{id}:
+    get:
+      tags:
+        - Equipment
+      summary: Get equipment by ID
+      description: Retrieve detailed information about specific equipment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "eq1"
+      responses:
+        '200':
+          description: Equipment details retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Equipment'
+        '404':
+          description: Equipment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      tags:
+        - Equipment
+      summary: Update equipment
+      description: Update equipment information (Admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "eq1"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEquipmentRequest'
+      responses:
+        '200':
+          description: Equipment updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Equipment'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - Admin access required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Equipment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - Equipment
+      summary: Delete equipment
+      description: Remove equipment from inventory (Admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "eq1"
+      responses:
+        '204':
+          description: Equipment deleted successfully
+        '403':
+          description: Forbidden - Admin access required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Equipment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Cannot delete equipment with active borrow requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /equipment/categories:
+    get:
+      tags:
+        - Equipment
+      summary: Get all categories
+      description: Retrieve list of equipment categories
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Categories retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                example: ["Laptops", "Tablets", "Cameras", "Audio", "Projectors", "Lab Equipment"]
+
+  /requests:
+    get:
+      tags:
+        - Borrow Requests
+      summary: List borrow requests
+      description: Retrieve borrow requests based on user role (students see their own, staff/admin see all)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, approved, rejected, returned]
+          description: Filter by status
+          example: "pending"
+        - name: userId
+          in: query
+          schema:
+            type: string
+          description: Filter by user ID (staff/admin only)
+          example: "1"
+        - name: equipmentId
+          in: query
+          schema:
+            type: string
+          description: Filter by equipment ID
+          example: "eq1"
+      responses:
+        '200':
+          description: Requests retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BorrowRequest'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      tags:
+        - Borrow Requests
+      summary: Create borrow request
+      description: Submit a new equipment borrow request
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBorrowRequest'
+      responses:
+        '201':
+          description: Request created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BorrowRequest'
+        '400':
+          description: Invalid input or insufficient equipment availability
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /requests/{id}:
+    get:
+      tags:
+        - Borrow Requests
+      summary: Get request by ID
+      description: Retrieve specific borrow request details
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "req1"
+      responses:
+        '200':
+          description: Request details retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BorrowRequest'
+        '404':
+          description: Request not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /requests/{id}/status:
+    patch:
+      tags:
+        - Borrow Requests
+      summary: Update request status
+      description: Approve, reject, or mark as returned (Staff/Admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "req1"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRequestStatusRequest'
+      responses:
+        '200':
+          description: Status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BorrowRequest'
+        '400':
+          description: Invalid status transition
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - Staff/Admin access required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Request not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /users:
+    get:
+      tags:
+        - Users
+      summary: List all users
+      description: Retrieve all users (Admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: role
+          in: query
+          schema:
+            type: string
+            enum: [student, staff, admin]
+          description: Filter by role
+          example: "student"
+      responses:
+        '200':
+          description: Users retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '403':
+          description: Forbidden - Admin access required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /health:
+    get:
+      tags:
+        - System
+      summary: Health check
+      description: Check if API is running
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: "2025-01-15T10:30:00Z"
