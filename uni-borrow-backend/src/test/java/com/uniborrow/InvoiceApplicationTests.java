@@ -1,4 +1,4 @@
-package com.invoice;
+package com.uniborrow;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

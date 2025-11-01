@@ -1,11 +1,11 @@
-package com.invoice.repository;
+package com.uniborrow.repository;
 
 import java.util.List;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-import com.invoice.model.BorrowRequest;
-import com.invoice.model.BorrowStatus;
+import com.uniborrow.model.BorrowRequest;
+import com.uniborrow.model.BorrowStatus;
 
 public interface BorrowRepository extends MongoRepository<BorrowRequest, String> {
     List<BorrowRequest> findByUserId(String userId);

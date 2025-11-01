@@ -1,13 +1,13 @@
-package com.invoice;
+package com.uniborrow;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class InvoiceApplication {
+public class UniBorrowApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(InvoiceApplication.class, args);
+		SpringApplication.run(UniBorrowApplication.class, args);
 	}
 
 }

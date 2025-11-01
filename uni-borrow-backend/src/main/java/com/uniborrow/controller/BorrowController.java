@@ -1,4 +1,4 @@
-package com.invoice.controller;
+package com.uniborrow.controller;
 
 import java.time.Instant;
 import java.util.List;
@@ -17,9 +17,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.invoice.model.BorrowRequest;
-import com.invoice.model.BorrowStatus;
-import com.invoice.repository.BorrowRepository;
+import com.uniborrow.dto.UpdateRequestStatusRequest;
+import com.uniborrow.model.BorrowRequest;
+import com.uniborrow.model.BorrowStatus;
+import com.uniborrow.repository.BorrowRepository;
 
 import jakarta.validation.Valid;
 
@@ -121,76 +122,5 @@ public class BorrowController {
         return ResponseEntity.ok(saved);
     }
 
-    // --- DTOs ---
-    public static class CreateBorrowRequest {
-        private String equipmentId;
-        private int quantity;
-        private String notes;
-        // optional overrides (until auth is wired)
-        private String userId;
-        private String userName;
-
-        public String getEquipmentId() {
-            return equipmentId;
-        }
-
-        public void setEquipmentId(String equipmentId) {
-            this.equipmentId = equipmentId;
-        }
-
-        public int getQuantity() {
-            return quantity;
-        }
-
-        public void setQuantity(int quantity) {
-            this.quantity = quantity;
-        }
-
-        public String getNotes() {
-            return notes;
-        }
-
-        public void setNotes(String notes) {
-            this.notes = notes;
-        }
-
-        public String getUserId() {
-            return userId;
-        }
-
-        public void setUserId(String userId) {
-            this.userId = userId;
-        }
-
-        public String getUserName() {
-            return userName;
-        }
-
-        public void setUserName(String userName) {
-            this.userName = userName;
-        }
-    }
-
-    public static class UpdateRequestStatusRequest {
-        private String status;
-        // optional: who approved it (temporary)
-        private String approvedBy;
-
-        public String getStatus() {
-            return status;
-        }
-
-        public void setStatus(String status) {
-            this.status = status;
-        }
-
-        public String getApprovedBy() {
-            return approvedBy;
-        }
-
-        public void setApprovedBy(String approvedBy) {
-            this.approvedBy = approvedBy;
-        }
-    }
 
 }

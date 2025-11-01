@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.invoice</groupId>
-	<artifactId>invoice-system</artifactId>
+	<artifactId>uni-borrow-system</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>spring-boot-data-mongodb</name>
 	<description>Spring Boot CRUD Rest APIs with Spring Data MongoDB</description>

@@ -1,4 +1,4 @@
-package com.invoice.model;
+package com.uniborrow.model;
 
 public enum BorrowStatus {
     PENDING,

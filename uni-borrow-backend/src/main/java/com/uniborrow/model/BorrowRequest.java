@@ -1,4 +1,4 @@
-package com.invoice.model;
+package com.uniborrow.model;
 
 import java.time.Instant;
 
