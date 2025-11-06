@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BorrowRequest, Equipment, mockRequests, mockEquipment } from '@/lib/mockData';
+import { useDataMode } from '@/contexts/DataModeContext';
+import { listRequestsLive, updateRequestStatusLive } from '@/lib/requestsApi';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,18 +12,30 @@ import { toast } from '@/hooks/use-toast';
 
 export const StaffPanel = () => {
   const { user } = useAuth();
+  const { mode } = useDataMode();
   const [requests, setRequests] = useState<BorrowRequest[]>([]);
   const [equipment, setEquipment] = useState<Equipment[]>([]);
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [mode]);
 
   const loadData = () => {
     const storedRequests = localStorage.getItem('requests');
     const storedEquipment = localStorage.getItem('equipment');
-    
-    setRequests(storedRequests ? JSON.parse(storedRequests) : mockRequests);
+    if (mode === 'live') {
+      // try live
+      (async () => {
+        try {
+          const live = await listRequestsLive();
+          setRequests(live);
+        } catch (e) {
+          setRequests(storedRequests ? JSON.parse(storedRequests) : mockRequests);
+        }
+      })();
+    } else {
+      setRequests(storedRequests ? JSON.parse(storedRequests) : mockRequests);
+    }
     setEquipment(storedEquipment ? JSON.parse(storedEquipment) : mockEquipment);
   };
 
@@ -42,12 +56,17 @@ export const StaffPanel = () => {
         setEquipment(updatedEquipment);
         localStorage.setItem('equipment', JSON.stringify(updatedEquipment));
 
-        return {
+        const updated = {
           ...req,
           status: 'approved' as const,
           approvedDate: new Date().toISOString(),
           approvedBy: user?.name,
         };
+        if (mode === 'live') {
+          // fire-and-forget update, keep optimistic UI
+          updateRequestStatusLive(requestId, { status: 'APPROVED', approvedBy: user?.name });
+        }
+        return updated;
       }
       return req;
     });
@@ -67,6 +86,10 @@ export const StaffPanel = () => {
         ? { ...req, status: 'rejected' as const, approvedBy: user?.name }
         : req
     );
+
+    if (mode === 'live') {
+      updateRequestStatusLive(requestId, { status: 'REJECTED', approvedBy: user?.name });
+    }
 
     setRequests(updatedRequests);
     localStorage.setItem('requests', JSON.stringify(updatedRequests));
@@ -97,6 +120,10 @@ export const StaffPanel = () => {
         ? { ...req, status: 'returned' as const, returnDate: new Date().toISOString() }
         : req
     );
+
+    if (mode === 'live') {
+      updateRequestStatusLive(requestId, { status: 'RETURNED' });
+    }
 
     setRequests(updatedRequests);
     localStorage.setItem('requests', JSON.stringify(updatedRequests));

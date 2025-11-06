@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Equipment, BorrowRequest } from '@/lib/mockData';
+import { useDataMode } from '@/contexts/DataModeContext';
+import { createRequestLive } from '@/lib/requestsApi';
 import { useAuth } from '@/contexts/AuthContext';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -18,12 +20,11 @@ export const BorrowDialog = ({ equipment, open, onOpenChange }: BorrowDialogProp
   const { user } = useAuth();
   const [quantity, setQuantity] = useState(1);
   const [notes, setNotes] = useState('');
+  const { mode } = useDataMode();
 
   const handleSubmit = () => {
     if (!user) return;
-
-    const newRequest: BorrowRequest = {
-      id: Date.now().toString(),
+    const newRequestPartial: Partial<BorrowRequest> = {
       equipmentId: equipment.id,
       userId: user.id,
       userName: user.name,
@@ -33,17 +34,44 @@ export const BorrowDialog = ({ equipment, open, onOpenChange }: BorrowDialogProp
       notes,
     };
 
-    const existingRequests = JSON.parse(localStorage.getItem('requests') || '[]');
-    localStorage.setItem('requests', JSON.stringify([...existingRequests, newRequest]));
+    if (mode === 'live') {
+      createRequestLive(newRequestPartial)
+        .then((created) => {
+          // append to local cache so UI can reflect quickly
+          const existing = JSON.parse(localStorage.getItem('requests') || '[]');
+          localStorage.setItem('requests', JSON.stringify([...existing, created]));
+          toast({ title: 'Request submitted', description: `Your request for ${equipment.name} has been submitted.` });
+          onOpenChange(false);
+          setQuantity(1);
+          setNotes('');
+        })
+        .catch(() => {
+          toast({ title: 'Submission failed', description: 'Could not submit request to server', variant: 'destructive' });
+        });
+    } else {
+      const newRequest: BorrowRequest = {
+        id: Date.now().toString(),
+        equipmentId: equipment.id,
+        userId: user.id,
+        userName: user.name,
+        status: 'pending',
+        requestDate: new Date().toISOString(),
+        quantity,
+        notes,
+      };
 
-    toast({
-      title: "Request submitted",
-      description: `Your request for ${equipment.name} has been submitted for approval.`,
-    });
+      const existingRequests = JSON.parse(localStorage.getItem('requests') || '[]');
+      localStorage.setItem('requests', JSON.stringify([...existingRequests, newRequest]));
 
-    onOpenChange(false);
-    setQuantity(1);
-    setNotes('');
+      toast({
+        title: "Request submitted",
+        description: `Your request for ${equipment.name} has been submitted for approval.`,
+      });
+
+      onOpenChange(false);
+      setQuantity(1);
+      setNotes('');
+    }
   };
 
   return (

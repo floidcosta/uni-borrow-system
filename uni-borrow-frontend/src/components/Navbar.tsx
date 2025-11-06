@@ -1,11 +1,13 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import { useDataMode } from '@/contexts/DataModeContext';
 import { LogOut, Package } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { mode, setMode } = useDataMode();
 
   const handleLogout = () => {
     logout();
@@ -23,6 +25,14 @@ export const Navbar = () => {
         </div>
         
         <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Button size="sm" variant={mode === 'mock' ? 'outline' : 'ghost'} onClick={() => setMode('mock')}>
+              Mock
+            </Button>
+            <Button size="sm" variant={mode === 'live' ? 'outline' : 'ghost'} onClick={() => setMode('live')}>
+              Live
+            </Button>
+          </div>
           <div className="text-sm">
             <p className="font-medium text-foreground">{user.name}</p>
             <p className="text-muted-foreground capitalize">{user.role}</p>

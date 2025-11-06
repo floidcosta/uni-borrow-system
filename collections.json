@@ -1,0 +1,108 @@
+{
+    "info": {
+        "name": "Uni Borrow System API",
+        "description": "Collection for testing the Uni Borrow System endpoints",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "List Borrow Requests",
+            "request": {
+                "method": "GET",
+                "url": {
+                    "raw": "http://localhost:8080/requests?status=PENDING&userId=user123&equipmentId=equip456",
+                    "protocol": "http",
+                    "host": ["localhost"],
+                    "port": "8080",
+                    "path": ["requests"],
+                    "query": [
+                        {
+                            "key": "status",
+                            "value": "PENDING",
+                            "description": "Optional status filter",
+                            "disabled": true
+                        },
+                        {
+                            "key": "userId",
+                            "value": "user123",
+                            "description": "Optional user filter",
+                            "disabled": true
+                        },
+                        {
+                            "key": "equipmentId",
+                            "value": "equip456",
+                            "description": "Optional equipment filter",
+                            "disabled": true
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Create Borrow Request",
+            "request": {
+                "method": "POST",
+                "url": {
+                    "raw": "http://localhost:8080/requests",
+                    "protocol": "http",
+                    "host": ["localhost"],
+                    "port": "8080",
+                    "path": ["requests"]
+                },
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"equipmentId\": \"equip123\",\n    \"quantity\": 1,\n    \"notes\": \"Need this for my project\",\n    \"userId\": \"user123\",\n    \"userName\": \"John Doe\"\n}"
+                }
+            }
+        },
+        {
+            "name": "Get Borrow Request by ID",
+            "request": {
+                "method": "GET",
+                "url": {
+                    "raw": "http://localhost:8080/requests/{{requestId}}",
+                    "protocol": "http",
+                    "host": ["localhost"],
+                    "port": "8080",
+                    "path": ["requests", "{{requestId}}"]
+                }
+            }
+        },
+        {
+            "name": "Update Request Status",
+            "request": {
+                "method": "PATCH",
+                "url": {
+                    "raw": "http://localhost:8080/requests/{{requestId}}/status",
+                    "protocol": "http",
+                    "host": ["localhost"],
+                    "port": "8080",
+                    "path": ["requests", "{{requestId}}", "status"]
+                },
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"status\": \"APPROVED\",\n    \"approvedBy\": \"admin123\"\n}"
+                }
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "requestId",
+            "value": "your-request-id-here",
+            "description": "ID of the borrow request"
+        }
+    ]
+}

@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BorrowRequest, Equipment, mockRequests, mockEquipment } from '@/lib/mockData';
+import { useDataMode } from '@/contexts/DataModeContext';
+import { listRequestsLive } from '@/lib/requestsApi';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,16 +10,30 @@ import { format } from 'date-fns';
 
 export const MyRequests = () => {
   const { user } = useAuth();
+  const { mode } = useDataMode();
   const [requests, setRequests] = useState<BorrowRequest[]>([]);
   const [equipment, setEquipment] = useState<Equipment[]>([]);
 
   useEffect(() => {
     const storedRequests = localStorage.getItem('requests');
     const storedEquipment = localStorage.getItem('equipment');
-    
-    setRequests(storedRequests ? JSON.parse(storedRequests) : mockRequests);
+    const load = async () => {
+      if (mode === 'live') {
+        try {
+          const live = await listRequestsLive();
+          setRequests(live);
+        } catch (e) {
+          // fallback to stored or mock
+          setRequests(storedRequests ? JSON.parse(storedRequests) : mockRequests);
+        }
+      } else {
+        setRequests(storedRequests ? JSON.parse(storedRequests) : mockRequests);
+      }
+    };
+
+    load();
     setEquipment(storedEquipment ? JSON.parse(storedEquipment) : mockEquipment);
-  }, []);
+  }, [mode]);
 
   const myRequests = requests.filter(req => req.userId === user?.id);
 
