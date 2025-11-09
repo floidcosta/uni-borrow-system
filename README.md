@@ -13,7 +13,9 @@ docker compose up -d
 
 ## api to test
 
-http://localhost:8080/api/invoices
+Listing requests: GET http://localhost:8080/requests
+Creating a request: POST http://localhost:8080/requests
+Updating status: PATCH http://localhost:8080/requests/{id}/status
 
 ## swagger
 http://localhost:8080/swagger-ui/index.html
