@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800">
+  <rect width="1200" height="800" fill="#f5f7fb"/>
+  <rect x="0" y="0" width="1200" height="64" fill="#0f1724"/>
+  <text x="24" y="40" fill="#fff" font-family="Arial" font-size="18">Approvals</text>
+
+  <rect x="16" y="88" width="1168" height="680" fill="#fff" stroke="#d1d8e0" rx="8"/>
+  <text x="40" y="120" fill="#6b7280" font-family="Arial" font-size="14">Pending requests queue</text>
+
+  <!-- request card -->
+  <rect x="48" y="152" width="520" height="120" rx="8" fill="#fff" stroke="#e6eef8"/>
+  <text x="64" y="184" fill="#111827" font-family="Arial" font-size="14">#req-001 • Laptop Dell XPS 15 • John Student</text>
+  <rect x="420" y="208" width="64" height="28" rx="6" fill="#16a34a"/>
+  <text x="434" y="227" fill="#fff" font-family="Arial" font-size="12">Approve</text>
+  <rect x="492" y="208" width="64" height="28" rx="6" fill="#ef4444"/>
+  <text x="506" y="227" fill="#fff" font-family="Arial" font-size="12">Reject</text>
+
+  <!-- details panel -->
+  <rect x="600" y="152" width="520" height="520" rx="8" fill="#fff" stroke="#e6eef8"/>
+  <text x="620" y="184" fill="#6b7280" font-family="Arial" font-size="14">Selected Request</text>
+</svg>

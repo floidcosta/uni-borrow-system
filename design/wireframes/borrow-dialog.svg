@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="480">
+  <rect width="640" height="480" fill="#00000000"/>
+  <rect x="40" y="40" width="560" height="400" rx="8" fill="#fff" stroke="#d1d8e0"/>
+  <text x="64" y="84" fill="#111827" font-family="Arial" font-size="18">Create Borrow Request</text>
+
+  <text x="64" y="120" fill="#6b7280" font-family="Arial" font-size="13">Equipment</text>
+  <rect x="64" y="132" width="512" height="36" fill="#f8fafc" stroke="#e6eef8"/>
+
+  <text x="64" y="184" fill="#6b7280" font-family="Arial" font-size="13">Quantity</text>
+  <rect x="64" y="196" width="160" height="36" fill="#fff" stroke="#e6eef8"/>
+
+  <text x="64" y="248" fill="#6b7280" font-family="Arial" font-size="13">Notes</text>
+  <rect x="64" y="260" width="512" height="80" fill="#fff" stroke="#e6eef8"/>
+
+  <rect x="384" y="360" width="96" height="36" rx="6" fill="#0f62fe"/>
+  <text x="402" y="385" fill="#fff" font-family="Arial" font-size="13">Submit</text>
+  <rect x="496" y="360" width="80" height="36" rx="6" fill="#e6eef8"/>
+  <text x="514" y="385" fill="#111827" font-family="Arial" font-size="13">Cancel</text>
+</svg>
